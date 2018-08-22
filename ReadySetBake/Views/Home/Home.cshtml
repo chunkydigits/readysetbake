@@ -1,0 +1,348 @@
+﻿@model ReadySetBake.Models.ViewModel
+@{
+    ViewBag.Title = "Ready, Set, Bake";
+    string className = "odd";
+}
+
+This is the page that everything will happen on.
+<div class="row">
+
+<div class="col-md-6">
+    <div class="col-md-12">
+        <div class="col-md-12">
+            Leagues
+            <div class="row">
+                <div class="col-md-6 panel-height">
+                    @foreach (var league in Model.Leagues)
+                    {
+                        <div class="row" onclick="javascript:$('.league').hide();$('#@league.Id').show()">
+                            <div class="col-md-10">@league.Name</div>
+                            <div class="col-md-2">@league.Users.Count</div>
+                        </div>
+                    }
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <button id="join-league-button" class="btn btn-block btn-default" data-toggle="modal" data-target="#join-league-modal">Join</button>
+                        </div>
+                        <div class="col-md-6">
+                            <button id="join-league-button" class="btn btn-block btn-success" data-toggle="modal" data-target="#create-league-modal">Create</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 panel-height">
+                    @foreach (var league in Model.Leagues)
+                    {
+                        <div class="league" style="display:none;" id="@league.Id">
+                            <div class="row">@league.Name (@league.Code)</div>
+                            @foreach (var user in league.Users)
+                            {
+                                <div class="row">
+                                    <div class="col-md-8">@user.Name</div>
+                                    <div class="col-md-4">@user.CurrentScore</div>
+                                </div>
+                            }
+                            @if (league.Name != "All Users")
+                            {
+                                <div class="col-md-12">
+                                    <button id="leave-league-button" class="btn btn-block btn-warning" data-target="#remove-league-modal" onclick="javascript:LeaveLeague('@league.Id', '@league.Name');">Remove</button>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="row baker-row-header">
+        <div class="col-md-2">Baker</div>
+        <div class="col-md-1">1</div>
+        <div class="col-md-1">2</div>
+        <div class="col-md-1">3</div>
+        <div class="col-md-1">4</div>
+        <div class="col-md-1">5</div>
+        <div class="col-md-1">6</div>
+        <div class="col-md-1">7</div>
+        <div class="col-md-1">8</div>
+        <div class="col-md-1">Semi</div>
+        <div class="col-md-1">Final</div>
+    </div>
+
+    @foreach (var baker in Model.Bakers.OrderBy(o => o.Name))
+    {
+        bool exited = false;
+        className = className == "even" ? "odd" : "even";
+        <div class="row baker-row-@className">
+            <div class="col-md-2">@baker.FirstName</div>
+            @foreach (var week in Model.Weeks)
+            {
+                <div class="col-md-1">
+                    <div class="row">
+                        @if (week.Week.Order == 1)
+                        {
+                            if (baker.Id == week.ActualStarBaker)
+                            {
+                                <div class="col-md-12 week1" style="padding: 0; text-align: center;">
+                                    <i class="glyphicon glyphicon-star actual-star"></i>
+                                </div>
+                            }
+                            else if (week.Week.ExitBaker != null && baker.Id == week.Week.ExitBaker.Id)
+                            {
+                                <div class="col-md-12 week1" style="padding: 0; text-align: center;">
+                                    <i class="glyphicon glyphicon-home actual-exit"></i>
+                                </div>
+                                exited = true;
+                            }
+                            else
+                            {
+                                <div class="col-md-12 week1" style="padding: 0; text-align: center;">
+                                    &nbsp;
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            if (exited)
+                            {
+                                <div class="col-md-12 week1" style="padding: 0; text-align: center;">
+                                    &nbsp;
+                                </div>
+                            }
+                            else
+                            {
+                                if (week.Week.EndDateTime > DateTime.UtcNow)
+                                {
+                                    if (baker.Id == week.PredictedStarBakerId || baker.Id == week.PredictedExitBakerId)
+                                    {
+                                        if (baker.Id == week.PredictedStarBakerId)
+                                        {
+                                            <div class="col-md-12" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-star selected star-prediction" id="@baker.Id-star" value="@baker.Id"></i>
+                                            </div>
+                                        }
+                                        if (baker.Id == week.PredictedExitBakerId)
+                                        {
+                                            <div class="col-md-12" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-home selected exit-prediction" id="@baker.Id-exit" value="@baker.Id"></i>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <div class="col-md-6" style="padding: 0; text-align: right;">
+                                            <i class="glyphicon glyphicon-star unselected clickable star-prediction" id="@baker.Id-star" value="@baker.Id" onclick="javascript:SetStarBakerPrediction('@week.Week.Id', '@baker.Id' ); "></i>
+                                        </div>
+                                        <div class="col-md-6" style="padding: 0;">
+                                            <i class="glyphicon glyphicon-home unselected clickable exit-prediction" id="@baker.Id-exit" value="@baker.Id" onclick="javascript:SetExitBakerPrediction('@week.Week.Id', '@baker.Id' ); "></i>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    if (week.Week.StarBaker != null && baker.Id == week.Week.StarBaker.Id)
+                                    {
+                                        <div class="col-md-12 closed" style="padding: 0; text-align: center;">
+                                            <i class="glyphicon glyphicon-star actual-star"></i>
+                                            @if (week.PredictedStarBakerId == week.Week.StarBaker.Id)
+                                            {
+                                                <text>+1</text>
+                                            }
+
+                                            @if (week.PredictedExitBakerId == week.Week.StarBaker.Id)
+                                            {
+                                                <text>-1</text>
+                                            }
+                                        </div>
+                                    }
+                                    else if (week.Week.ExitBaker != null && baker.Id == week.Week.ExitBaker.Id)
+                                    {
+                                        <div class="col-md-12 closed" style="padding: 0; text-align: center;">
+                                            <i class="glyphicon glyphicon-home actual-exit"></i>
+                                            @if (week.PredictedStarBakerId == week.Week.ExitBaker.Id)
+                                            {
+                                                <text>-1</text>
+                                            }
+
+                                            @if (week.PredictedExitBakerId == week.Week.ExitBaker.Id)
+                                            {
+                                                <text>+1</text>
+                                            }
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        <div class="col-md-6 closed" style="padding: 0; text-align: right;">
+                                            &nbsp;
+                                        </div>
+                                    }
+                                    if (week.Week.ExitBaker != null && week.Week.ExitBaker.Id == baker.Id)
+                                    {
+                                        exited = true;
+                                    }
+                                }
+                            }
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+        <div class="col-md-6">
+            <div class="col-md-12">
+                <img src="@Url.Content("/Content/images/bakers/exit/" + Model.LastWeekExitBaker + ".png")" style="width: 100%;"/>
+            </div>
+            <div class="spacer"></div>
+            <div class="col-md-12">
+                <img src="@Url.Content("/Content/images/bakers/star/" + Model.LastWeekStarBaker + ".png")" style="width: 100%;"/>
+            </div>
+            <div class="spacer"></div>
+            <div class="col-md-12">
+                <div class="score-panel col-md-12">
+                    <div class="col-md-6 title">Current Score</div>
+                    <div class="col-md-6 content">@Model.Score</div>
+                </div>
+                @*<div class="score-panel col-md-4">
+                <div class="col-md-12 title">Predicted Star</div>
+                <div class="col-md-12 content">@Model.Score</div>
+            </div>
+            <div class="score-panel col-md-4">
+                <div class="col-md-12 title">Predicted Exit</div>
+                <div class="col-md-12 content">@Model.Score</div>
+            </div>*@
+            </div>
+
+        </div>
+</div>
+
+
+<div class="modal fade" id="join-league-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Join a League</h4>
+            </div>
+            <div class="modal-body">
+                <p>Enter the code for the league you wish to join</p>
+                <input type="text" id="code-textbox" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="join-league-save">Join</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="create-league-modal" tabindex="-1" role="dialog" aria-labelledby="create-league-Label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="create-league-Label">Create a League</h4>
+            </div>
+            <div class="modal-body">
+                <p>What would you like to call the league you want to create</p>
+                <input type="text" id="name-textbox" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="create-league-save">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="remove-league-modal" tabindex="-1" role="dialog" aria-labelledby="remove-league-Label">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="remove-league-Label">Leave a League</h4>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure that you want to leave the league named <span id="leave-league-name">name</span>?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+                <button type="button" class="btn btn-primary" id="remove-league-save">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+    $(function () {
+        $('#join-league-save').on('click', function () {
+            var code = $('#code-textbox').val();
+            var userid = '@Model.UserId';
+            $.ajax({
+                url: '/api/League/Join/' + userid + '/' + code,
+                type: 'GET',
+                success: function (data) {
+                    if (data == false)
+                        alert('League does not exist ... try again')
+                    else
+                        window.location.href = window.location.href;
+                }
+            });
+        });
+
+        $('#create-league-save').on('click', function () {
+            var name = $('#name-textbox').val();
+            var userid = '@Model.UserId';
+            $.ajax({
+                url: '/api/League/Create/' + userid + '/' + name,
+                type: 'GET',
+                success: function (data) {
+                    window.location.href = window.location.href;
+                }
+            });
+        });
+
+        $('#remove-league-save').on('click', function () {
+            var userid = '@Model.UserId';
+            $.ajax({
+                url: '/api/League/Leave/' + userid + '/' + leaveLeagueId,
+                type: 'GET',
+                success: function (data) {
+                    window.location.href = window.location.href;
+                }
+            });
+        });
+    });
+
+    function SetStarBakerPrediction(weekId, bakerId) {
+        var userid = '@Model.UserId';
+        $.ajax({
+            url: '/api/Prediction/Star/' + userid + '/' + weekId + '/' + bakerId,
+            type: 'GET',
+            success: function (data) {
+                window.location.href = window.location.href;
+            }
+        });
+    }
+
+
+    function SetExitBakerPrediction(weekId, bakerId) {
+        var userid = '@Model.UserId';
+        $.ajax({
+            url: '/api/Prediction/Exit/' + userid + '/' + weekId + '/' + bakerId,
+            type: 'GET',
+            success: function (data) {
+                window.location.href = window.location.href;
+            }
+        });
+    }
+
+    function LeaveLeague(id, name) {
+        leaveLeagueId = id;
+        $('#leave-league-name').text(name);
+        $('#remove-league-modal').modal();
+    }
+
+    var leaveLeagueId = '';
+</script>

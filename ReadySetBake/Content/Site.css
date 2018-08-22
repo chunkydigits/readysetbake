@@ -1,0 +1,128 @@
+﻿body {
+  padding-top: 50px;
+  padding-bottom: 20px;
+}
+/* Set padding to keep content from hitting the edges */
+.body-content {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+/* Set width on the form input elements since they're 100% wide by default */
+input,
+select,
+textarea {
+  max-width: 280px;
+}
+/* styles for validation helpers */
+.field-validation-error {
+  color: #b94a48;
+}
+.field-validation-valid {
+  display: none;
+}
+input.input-validation-error {
+  border: 1px solid #b94a48;
+}
+input[type="checkbox"].input-validation-error {
+  border: 0 none;
+}
+.validation-summary-errors {
+  color: #b94a48;
+}
+.validation-summary-valid {
+  display: none;
+}
+.clickable {
+  cursor: pointer;
+}
+.selected {
+  color: #111111;
+}
+.unselected {
+  color: #bbbbbb;
+}
+.star-prediction-correct,
+.exit-prediction-correct {
+  background-color: darkseagreen;
+  color: darkolivegreen;
+}
+.star-prediction-wrong,
+.exit-prediction-wrong {
+  background-color: indianred;
+  color: darkred;
+}
+.decimal-container {
+  width: 10%;
+  display: inline-block;
+}
+.title {
+  background-color: #111111;
+  color: white;
+}
+.full-width {
+  width: 100%;
+}
+.baker-face {
+  overflow: hidden;
+  margin-bottom: 10px;
+  position: relative;
+}
+.baker-face .title {
+  text-align: center;
+}
+.baker-face > img {
+  width: 100%;
+}
+.baker-face .out {
+  height: 100%;
+  position: absolute;
+  opacity: 0.5;
+  background-color: #666;
+  left: 15px;
+  right: 15px;
+  top: 0;
+  bottom: 0;
+}
+.actual-star {
+  color: green;
+}
+.actual-exit {
+  color: red;
+}
+.week1 {
+  background-color: lightblue;
+  border: 1px lightblue solid;
+}
+.baker-row-odd {
+  background-color: #eeeeee;
+}
+.baker-row-even {
+  background-color: #dddddd;
+}
+.baker-row-header {
+  background-color: #bbbbbb;
+  text-align: center;
+}
+.spacer {
+  width: 100%;
+  height: 20px;
+  display: inline-block;
+}
+.center {
+  text-align: center;
+}
+.score-panel {
+  border-radius: 15px;
+  background-color: darkred;
+  color: white;
+  text-align: center;
+  padding: 2em;
+}
+.score-panel .title {
+  font-size: 3em;
+  background-color: darkred;
+}
+.score-panel .content {
+  font-size: 5em;
+}
+/*# sourceMappingURL=Site.css.map */

@@ -1,0 +1,165 @@
+﻿@model ReadySetBake.Models.ViewModel
+@{
+    ViewBag.Title = "Admin";
+    string className = "odd";
+}
+
+<h2>Admin</h2>
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="row baker-row-header">
+            <div class="col-md-2">Baker</div>
+            <div class="col-md-1">1</div>
+            <div class="col-md-1">2</div>
+            <div class="col-md-1">3</div>
+            <div class="col-md-1">4</div>
+            <div class="col-md-1">5</div>
+            <div class="col-md-1">6</div>
+            <div class="col-md-1">7</div>
+            <div class="col-md-1">8</div>
+            <div class="col-md-1">Semi</div>
+            <div class="col-md-1">Final</div>
+        </div>
+
+        @foreach (var baker in Model.Bakers.OrderBy(o => o.Name))
+        {
+            bool exited = false;
+            className = className == "even" ? "odd" : "even";
+            <div class="row baker-row-@className">
+                <div class="col-md-2">@baker.FirstName</div>
+                @foreach (var week in Model.Weeks)
+                {
+                    <div class="col-md-1">
+                        <div class="row">
+                            @if (exited)
+                            {
+                                <div class="col-md-12 week1" style="padding: 0; text-align: center;">
+                                    &nbsp;
+                                </div>
+                            }
+                            else
+                            {
+                                if (week.Week.EndDateTime > DateTime.UtcNow.AddDays(-7) && week.Week.EndDateTime < DateTime.UtcNow.AddMinutes(57) && week.Week.Scored == false)
+                                {
+                                    if (week.Week.StarBaker == null || week.Week.ExitBaker == null)
+                                    {
+                                        <div class="col-md-6" style="padding: 0; text-align: right;">
+                                            <i class="glyphicon glyphicon-star unselected clickable star-prediction" id="@baker.Id-star" value="@baker.Id" onclick="javascript:SetStarBaker('@week.Week.Id', '@baker.Id');"></i>
+                                        </div>
+                                        <div class="col-md-6" style="padding: 0;">
+                                            <i class="glyphicon glyphicon-home unselected clickable exit-prediction" id="@baker.Id-exit" value="@baker.Id" onclick="javascript:SetExitBaker('@week.Week.Id', '@baker.Id');"></i>
+                                        </div>
+                                    }
+                                    else if (baker.Id == week.Week.StarBaker.Id || baker.Id == week.Week.ExitBaker.Id)
+                                    {
+                                        if (baker.Id == week.Week.StarBaker.Id)
+                                        {
+                                            <div class="col-md-12" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-star selected star-prediction" id="@baker.Id-star" value="@baker.Id"></i>
+                                            </div>
+                                        }
+                                        if (baker.Id == week.Week.ExitBaker.Id)
+                                        {
+                                            <div class="col-md-12" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-home selected exit-prediction" id="@baker.Id-exit" value="@baker.Id"></i>
+                                            </div>
+                                        }
+                                    }
+                                    else
+                                    {
+
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (week.Week.StarBaker != null)
+                                    {
+                                        if (baker.Id == week.Week.StarBaker.Id)
+                                        {
+                                            <div class="col-md-12 closed" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-star actual-star"></i>
+                                            </div>
+                                        }
+                                    }
+                                    if (week.Week.ExitBaker != null)
+                                    {
+                                        if (baker.Id == week.Week.ExitBaker.Id)
+                                        {
+                                            <div class="col-md-12 closed" style="padding: 0; text-align: center;">
+                                                <i class="glyphicon glyphicon-home actual-exit"></i>
+                                            </div>
+                                        }
+                                    }
+                                    if (week.Week.ExitBaker != null && week.Week.ExitBaker.Id == baker.Id)
+                                    {
+                                        exited = true;
+                                    }
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    <div class="spacer"></div>
+    <button class="btn btn-primary center" onclick="javascript: RunScoring();">Run Scoring (Week)</button>
+    <button class="btn btn-primary center" onclick="javascript: RunScoringAll();">Run Scoring (All)</button>
+</div>
+<script type="text/javascript">
+    function SetStarBaker(weekId, bakerId) {
+        $.ajax({
+            url: '/api/Result/Star/' + weekId + '/' + bakerId,
+            type: 'GET',
+            success: function (data) {
+                if (data)
+                    window.location.href = window.location.href;
+                else
+                    alert('Didn\'t Set Star Baker');
+            }
+        });
+    }
+
+    function SetExitBaker(weekId, bakerId) {
+        $.ajax({
+            url: '/api/Result/Exit/' + weekId + '/' + bakerId,
+            type: 'GET',
+            success: function (data) {
+                if (data)
+                    window.location.href = window.location.href;
+                else
+                    alert('Didn\'t Set Exit Baker');
+            }
+        });
+    }
+
+    function RunScoring() {
+        $.ajax({
+            url: '/api/Result/Score',
+            type: 'GET',
+            success: function (data) {
+                if (data)
+                    window.location.href = window.location.href;
+                else
+                    alert('Scoring didn\'t run');
+            }
+        });
+    }
+
+    function RunScoringAll() {
+        $.ajax({
+            url: '/api/Result/ScoreAll',
+            type: 'GET',
+            success: function (data) {
+                if (data)
+                    window.location.href = window.location.href;
+                else
+                    alert('Scoring didn\'t run');
+            }
+        });
+    }
+</script>

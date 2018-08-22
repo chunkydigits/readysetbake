@@ -1,0 +1,20 @@
+﻿@model ReadySetBake.Models.BakerViewModel
+@{
+    ViewBag.Title = "Contact";
+}
+<h2>@ViewBag.Title.</h2>
+<h3>@ViewBag.Message</h3>
+
+<div>
+    @foreach (var baker in Model.Bakers)
+    {
+        <div class="col-md-2 baker-face">
+            <div class="title full-width">@baker.Name</div>
+            <img src="~/Content/images/bakers/@(baker.Name).png" />
+            @if (Model.Weeks.Any(o => o.ExitBaker != null && o.ExitBaker.Id == baker.Id))
+            {
+                <div class="out"></div>
+            }
+            </div>
+    }
+        </div>
